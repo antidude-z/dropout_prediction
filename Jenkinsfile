@@ -11,7 +11,7 @@ pipeline {
         stage('Download') {
             steps {
                 echo 'Downloading repository...'
-                git url: 'https://github.com/antidude-z/mlflow_lab.git'
+                git url: 'https://github.com/antidude-z/dropout_prediction.git'
             }
         }
 
