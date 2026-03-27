@@ -1,0 +1,21 @@
+[project]
+name = "dropout-prediction"
+version = "1.0.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "catboost>=1.2.10",
+    "mlflow>=3.10.1",
+    "ucimlrepo>=0.0.7",
+    "xgboost>=3.2.0",
+]
+
+[tool.uv]
+package = true
+
+[project.scripts]
+train-model = "train_model:train"
+serve-model = "tools.serve_model:main"
+serve-ui = "tools.serve_ui:main"
+health-check = "health_check:main"
