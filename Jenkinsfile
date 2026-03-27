@@ -46,7 +46,7 @@ pipeline {
     post {
         success {
             script {
-                sh "./scripts/run_ui.sh"
+                sh "./scripts/serve_ui.sh"
             }
         }
     }
