@@ -1,9 +1,9 @@
-mlruns/
-mlflow.db
 .venv/
-__pycache__/
 .vscode/
-best_model/
-mlflow/
+.idea/
+__pycache__/
+
 *.egg-info
 dist/
+
+mlflow/
