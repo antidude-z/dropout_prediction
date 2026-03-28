@@ -16,6 +16,6 @@ package = true
 
 [project.scripts]
 train-model = "train_model:train"
-serve-model = "tools.serve_model:main"
-serve-ui = "tools.serve_ui:main"
+serve-model = "cli_servers:serve_model"
+serve-ui = "cli_servers:serve_ui"
 health-check = "health_check:main"

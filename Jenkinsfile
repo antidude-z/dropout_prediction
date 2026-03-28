@@ -24,14 +24,14 @@ pipeline {
         stage('Clean + Train') {
             steps {
                 echo 'Retraining all models...'
-                sh "./scripts/train.sh"
+                sh "./docker/scripts/train.sh"
             }
         }
 
         stage('Deploy') {
             steps {
                 echo 'Deploying best model with mlflow models serve...'
-                sh "./scripts/deploy.sh"
+                sh "./docker/scripts/deploy.sh"
             }
         }
 
@@ -46,7 +46,7 @@ pipeline {
     post {
         success {
             script {
-                sh "./scripts/serve_ui.sh"
+                sh "./docker/scripts/serve_ui.sh"
             }
         }
     }
