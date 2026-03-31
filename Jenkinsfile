@@ -7,6 +7,10 @@ pipeline {
         UI_CONTAINER = 'mlflow_ui'
     }
 
+    parameters {
+        booleanParam(name: 'LIGHTWEIGHT', defaultValue: false, description: 'Use lightweight version')
+    }
+
     stages {
         stage('Download') {
             steps {
