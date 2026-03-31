@@ -1,4 +1,8 @@
 import subprocess
+import os
+
+env = os.environ.copy()
+env["MLFLOW_TRACKING_URI"] = "sqlite:///mlflow/mlflow.db"
 
 
 def serve_model():
@@ -13,7 +17,7 @@ def serve_model():
             "--port",
             "8080",
         ],
-        env={"MLFLOW_TRACKING_URI": "sqlite:///mlflow/mlflow.db"},
+        env=env,
     )
 
 
@@ -26,5 +30,6 @@ def serve_ui():
             "sqlite:///mlflow/mlflow.db",
             "--port",
             "5000",
-        ]
+        ],
+        env=env,
     )
