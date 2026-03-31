@@ -20,9 +20,9 @@ model_grid = {
     },
 }
 
-if os.environ['LIGHTWEIGHT'] == 'false':
-    from xgboost import XGBClassifier
+if os.getenv("LIGHTWEIGHT") == "false":
     from catboost import CatBoostClassifier
+    from xgboost import XGBClassifier
 
     extension = {
         "XGBoost": {
