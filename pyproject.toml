@@ -14,6 +14,19 @@ dependencies = [
 [tool.uv]
 package = true
 
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "F",   # Pyflakes (errors)
+    "UP",  # pyupgrade (modernize code for newer Python)
+    "B",   # flake8-bugbear (common bugs and security issues)
+    "SIM", # flake8-simplify (simplify code)
+    "I",   # isort (import sorting),
+    "W",
+    "C901"
+]
+ignore = []
+
 [project.scripts]
 train-model = "train_model:train"
 serve-model = "cli_servers:serve_model"

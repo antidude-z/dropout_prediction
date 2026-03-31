@@ -1,6 +1,7 @@
+import json
+
 import numpy as np
 import requests
-import json
 
 from preprocessing import prepare_student_data
 
@@ -22,7 +23,7 @@ def main():
     response = requests.post(
         "http://localhost:8080/invocations",
         headers={"Content-Type": "application/json"},
-        data=json.dumps(data_payload)
+        data=json.dumps(data_payload),
     )
     response.raise_for_status()
     preds = response.json()["predictions"]
@@ -31,7 +32,7 @@ def main():
     print("-" * 50)
 
     correct = 0
-    for i, (idx, row) in enumerate(X_sample.iterrows()):
+    for i, (idx, _row) in enumerate(X_sample.iterrows()):
         true_ans = y_sample.loc[idx]
         pred = preds[i]
 
@@ -39,13 +40,13 @@ def main():
             correct += 1
 
         print(
-            f"Пример {i+1:2d} | "
+            f"Пример {i + 1:2d} | "
             f"Истинный: {y_sample.loc[idx]:10} | "
             f"Предсказание: {preds[i]}"
         )
 
-    print(f'Верных предсказаний: {correct * 100 / SAMPLE_COUNT}%')
+    print(f"Верных предсказаний: {correct * 100 / SAMPLE_COUNT}%")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
