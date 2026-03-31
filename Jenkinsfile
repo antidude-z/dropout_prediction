@@ -19,6 +19,19 @@ pipeline {
             }
         }
 
+        stage('Initialize Parameters') {
+            steps {
+                script {
+                    if (currentBuild.number == 1) {
+                        echo "Это первая сборка. Параметры загружены."
+                        echo "Пожалуйста, запустите сборку ещё раз через \"Build with Parameters\""
+                        currentBuild.result = 'ABORTED'
+                        error('Первая сборка только для инициализации параметров')
+                    }
+                }
+            }
+        }
+
         stage('Build Docker Image') {
             steps {
                 sh "docker build -t ${IMAGE_NAME} -f ./docker/Dockerfile --build-arg LIGHTWEIGHT=${params.LIGHTWEIGHT} ."
