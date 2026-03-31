@@ -7,6 +7,10 @@ pipeline {
         UI_CONTAINER = 'mlflow_ui'
     }
 
+    parameters {
+        booleanParam(name: 'LIGHTWEIGHT', defaultValue: false, description: 'Use lightweight version')
+    }
+
     stages {
         stage('Download') {
             steps {
@@ -17,7 +21,7 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh "docker build -t ${IMAGE_NAME} -f ./docker/Dockerfile ."
+                sh "docker build -t ${IMAGE_NAME} -f ./docker/Dockerfile --build-arg LIGHTWEIGHT=${params.LIGHTWEIGHT} ."
             }
         }
 

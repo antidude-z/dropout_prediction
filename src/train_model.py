@@ -1,7 +1,6 @@
 import shutil
 from pathlib import Path
 
-import mlflow
 from mlflow.tracking import MlflowClient
 from sklearn.metrics import (
     ConfusionMatrixDisplay,
@@ -12,6 +11,8 @@ from sklearn.metrics import (
 )
 from sklearn.model_selection import GridSearchCV, StratifiedKFold
 from sklearn.utils.class_weight import compute_sample_weight
+
+import mlflow
 
 # Загрузка и подготовка данных (бинарная классификация: Dropout = 1)
 from config import model_grid

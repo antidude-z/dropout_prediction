@@ -4,11 +4,13 @@ WORKDIR /app
 
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
 
-COPY ./docker/requirements.txt .
+COPY ./docker/requirements/ .
+COPY ./docker/scripts/install.sh .
 
-RUN python -m pip install --upgrade pip \
-    && pip install --no-cache-dir -r requirements.txt
+ARG LIGHTWEIGHT=false
+RUN sh install.sh
 
 COPY src/ .
 
 ENV MLFLOW_TRACKING_URI=sqlite:///mlflow/mlflow.db
+ENV LIGHTWEIGHT=${LIGHTWEIGHT}

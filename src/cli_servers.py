@@ -1,5 +1,5 @@
-import subprocess
 import os
+import subprocess
 
 env = os.environ.copy()
 env["MLFLOW_TRACKING_URI"] = "sqlite:///mlflow/mlflow.db"
