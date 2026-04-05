@@ -1,60 +1,129 @@
-# Dropout Prediction pipeline
-> Made by ubiquiste for MLOps' laboratory assignments #3 and #4.
+# Student Dropout Prediction Pipeline
 
-## Model description
+<image-card alt="Python" src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" ></image-card>
+<image-card alt="MLflow" src="https://img.shields.io/badge/MLflow-0194E2?style=for-the-badge&logo=mlflow&logoColor=white" ></image-card>
+<image-card alt="Docker" src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white" ></image-card>
 
-This pipeline is aimed at training a series of moderately complex machine learning algorithms applied to a classic [Student Dropout](https://archive.ics.uci.edu/dataset/697/predict+students+dropout+and+academic+success) dataset from UCI repo.
-The model itself solves a binary classification task of predicting whether a particular student has a high probability of leaving university before getting a degree (`class 1`) or not (`class 0`).
+> An end-to-end MLOps pipeline for predicting student dropout using machine learning.  
+> Built for MLOps laboratory assignments #3 and #4.
 
-## Local deployment
-> [!IMPORTANT]
-> Instructions below will work **if and only if** you have `uv` project manager and `git` SCM installed in your system.
+## Overview
+
+This project implements a complete machine learning pipeline for **binary classification** of student dropout risk. It uses the well-known [Predict Students' Dropout and Academic Success](https://archive.ics.uci.edu/dataset/697/predict+students+dropout+and+academic+success) dataset from the UCI Machine Learning Repository.
+
+The model predicts whether a student is likely to **drop out** (class 1) or **continue their studies** (class 0) based on academic, demographic, and socioeconomic features.
+
+The pipeline includes:
+- Automated data downloading and preprocessing
+- Training and hyperparameter tuning of multiple models
+- Model selection based on **ROC-AUC**
+- Model serving with MLflow
+- Health checks and MLflow UI
+- CI/CD deployment via Jenkins + Docker
+
+## Important: LIGHTWEIGHT Mode
+
+The pipeline supports a **`LIGHTWEIGHT`** parameter (boolean).  
+
+- **LIGHTWEIGHT=true** → Trains only a small subset of models with limited hyperparameter combinations. Much faster, ideal for quick tests and development.
+- **LIGHTWEIGHT=false** (default) → Trains all models with full hyperparameter search (slower but better performance).
+
+This parameter is especially useful in the Jenkins pipeline (set it in the job parameters) and can also be passed locally via environment variable.
+
+## Models
+
+By default, the pipeline trains and compares four classifiers:
+- **Logistic Regression**
+- **Random Forest Classifier**
+- **XGBoost Classifier**
+- **CatBoost Classifier**
+
+Each model is evaluated with multiple hyperparameter combinations defined in `src/config.py`. The best-performing model (by ROC-AUC) is automatically selected and registered for serving.
+
+## Quick Start (Local Deployment)
+
+### Prerequisites
+- [uv](https://docs.astral.sh/uv/) (Python package manager)
+- Git
+- Python 3.10+
+
+### Installation
 
 ```bash
 git clone https://github.com/antidude-z/dropout_prediction.git
-cd ./dropout_prediction
+cd dropout_prediction
 uv sync
 ```
 
-### Usage
+### Available Commands
 
-A brief overview of commands pre-defined for developer's convenience:
-#### Training
+| Command                        | Description                                                                 |
+|--------------------------------|-----------------------------------------------------------------------------|
+| `uv run train-model`           | Train models (uses LIGHTWEIGHT=false by default)                            |
+| `LIGHTWEIGHT=true uv run train-model` | Train in lightweight/fast mode                                      |
+| `uv run serve-model`           | Serve the best model using MLflow on **port 8080**                          |
+| `uv run health-check`          | Run a quick accuracy test on 50 random test samples                         |
+| `uv run serve-ui`              | Start the MLflow UI on **port 5000** for experiment tracking                |
+
+#### Example Usage
+
 ```bash
+# Full training (recommended for best results)
 uv run train-model
-```
-Run the training process and save artifacts inside `/mlflow` folder.
-This command also performs data obtainment and preprocessing. When those steps are done, 4 different models are trained by default: `LogisticRegression`, `RandomForestClassifier`, `XGBClassifier` and `CatBoostClassifier`.
-Each of these models is in turn fitted with various parameters listed in `/src/config.py`, and best model (algorithm- and parameter-wise) is chosen based on the value of ROC-AUC metric.
 
-> [!TIP]
-> The whole process tends to be quite slow (reaching ~20 mins on my PC), so setting `LIGHTWEIGHT=true` environment variable is advised in case you want quick results without achieving maximum model quality. This parameter excludes `XGBClassifier` and `CatBoostClassifier` models from training, drastically reducing execution time.
-#### Deployment
-```bash
+# Fast training for testing
+LIGHTWEIGHT=true uv run train-model
+
+# Serve the model for inference
 uv run serve-model
-```
-Serve the best-performing model using MLflow inference engine (`mlflow models serve...`) on *port 8080*. 
-#### Health check
-```bash
-uv run health-check
-```
-This is a simple utility which carries out an accuracy metric test on 50 random entries from the test split. Allows to check if the service is running and properly functioning.
-#### Running MLFlow UI
-```bash
+
+# Open MLflow UI in another terminal
 uv run serve-ui
 ```
-Serves a web interface on *port 5000* where you can evaluate all the data recorded during last training run by yourself.
 
-## Jenkins deployment
-> [!IMPORTANT]
-> Instructions below will work **if and only if** you have `git`, `Jenkins` and `docker` installed in your system.
+## Jenkins CI/CD Deployment
 
-1. Create a new `Pipeline`. 
-2. Set script definition to *Pipeline script from SCM*.
-3. Set SCM to `Git`.
-4. Type "https://github.com/antidude-z/dropout_prediction.git" in *Repository URL* field.
-5. Click *Save*.
-6. Run the newly created pipeline as usual. The first run will be aborted in order for Jenkins to fetch `LIGHTWEIGHT` parameter field inside the UI.
-7. Run the pipeline again - this time everything should work normally.
+The repository includes a `Jenkinsfile` for automated deployment.
 
-On a successful run, all of the operations described in [Usage](#usage) will be performed automatically using containerization. As a result, two docker containers should now be running in the background: `ml_model` on port 8080, which serves inference for your model, and `mlflow_ui` on port 5000. Those will be recreated on each pipeline run.
+When creating the Pipeline job in Jenkins:
+- You will see a **LIGHTWEIGHT** parameter in the job UI.
+- Set it to `true` for faster builds during development.
+- Set it to `false` for full training (better model quality).
+
+On successful completion, two Docker containers will start:
+- **`ml_model`** — serves model inference on **port 8080**
+- **`mlflow_ui`** — provides the MLflow dashboard on **port 5000**
+
+Containers are recreated on every pipeline run.
+
+## Project Structure
+
+```
+dropout_prediction/
+├── src/                  # Main source code (training, preprocessing, config)
+├── docker/               # Dockerfile and related scripts
+├── mlflow/               # Trained models and artifacts (generated)
+├── Jenkinsfile           # CI/CD pipeline definition
+├── pyproject.toml        # Project & dependency configuration
+├── uv.lock
+└── README.md
+```
+
+## Technologies Used
+
+- **Python** + `uv` for dependency management
+- **scikit-learn**, **XGBoost**, **CatBoost**
+- **MLflow** (experiment tracking + model serving)
+- **Docker** for containerization
+- **Jenkins** for CI/CD
+
+## Dataset
+
+- Source: [UCI Machine Learning Repository](https://archive.ics.uci.edu/dataset/697/predict+students+dropout+and+academic+success)
+- Task: Binary classification (Dropout vs. Non-Dropout)
+
+---
+
+**Made with ❤️ for MLOps learning purposes.**
+
+Feel free to open issues or submit pull requests!
