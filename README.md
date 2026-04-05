@@ -77,7 +77,7 @@ The repository includes a `Jenkinsfile` for automated deployment.
 4. Save and run the pipeline.
 
 > [!NOTE]
-> The first run may be aborted by Jenkins in order to correctly set pipeline parameters.
+> The first run may need to be manually re-triggered after Jenkins initializes the pipeline parameters.
 
 On successful completion, two Docker containers will start in the background:
 - **`ml_model`** — serves model inference on **port 8080**
