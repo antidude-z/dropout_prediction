@@ -1,9 +1,5 @@
 # Student Dropout Prediction Pipeline
 
-<image-card alt="Python" src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" ></image-card>
-<image-card alt="MLflow" src="https://img.shields.io/badge/MLflow-0194E2?style=for-the-badge&logo=mlflow&logoColor=white" ></image-card>
-<image-card alt="Docker" src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white" ></image-card>
-
 > An end-to-end MLOps pipeline for predicting student dropout using machine learning.  
 > Built for MLOps laboratory assignments #3 and #4.
 
@@ -13,32 +9,26 @@ This project implements a complete machine learning pipeline for **binary classi
 
 The model predicts whether a student is likely to **drop out** (class 1) or **continue their studies** (class 0) based on academic, demographic, and socioeconomic features.
 
-The pipeline includes:
-- Automated data downloading and preprocessing
-- Training and hyperparameter tuning of multiple models
-- Model selection based on **ROC-AUC**
-- Model serving with MLflow
-- Health checks and MLflow UI
-- CI/CD deployment via Jenkins + Docker
-
-## Important: LIGHTWEIGHT Mode
-
-The pipeline supports a **`LIGHTWEIGHT`** parameter (boolean).  
-
-- **LIGHTWEIGHT=true** → Trains only a small subset of models with limited hyperparameter combinations. Much faster, ideal for quick tests and development.
-- **LIGHTWEIGHT=false** (default) → Trains all models with full hyperparameter search (slower but better performance).
-
-This parameter is especially useful in the Jenkins pipeline (set it in the job parameters) and can also be passed locally via environment variable.
+The pipeline includes automated data handling, multiple model training with hyperparameter tuning, inference and MLFlow UI serving, health checks, and Jenkins + Docker CI/CD deployment. The best-performing model (by ROC-AUC) is automatically selected among competitors.
 
 ## Models
 
-By default, the pipeline trains and compares four classifiers:
+The pipeline trains and compares four classifiers:
 - **Logistic Regression**
 - **Random Forest Classifier**
 - **XGBoost Classifier**
 - **CatBoost Classifier**
 
-Each model is evaluated with multiple hyperparameter combinations defined in `src/config.py`. The best-performing model (by ROC-AUC) is automatically selected and registered for serving.
+Hyperparameter combinations for each model are defined in `src/config.py`.
+
+## Lightweight Mode
+
+> [!IMPORTANT]
+> The pipeline supports a `LIGHTWEIGHT` parameter (boolean, default: `false`).
+
+When `LIGHTWEIGHT=true`, the pipeline **excludes the two heavy models (XGBoost and CatBoost)** and trains only Logistic Regression and Random Forest. This mode is significantly faster and recommended for quick tests and development.
+
+You can enable it locally via environment variable or through the Jenkins job parameters.
 
 ## Quick Start (Local Deployment)
 
@@ -57,22 +47,18 @@ uv sync
 
 ### Available Commands
 
-| Command                        | Description                                                                 |
-|--------------------------------|-----------------------------------------------------------------------------|
-| `uv run train-model`           | Train models (uses LIGHTWEIGHT=false by default)                            |
-| `LIGHTWEIGHT=true uv run train-model` | Train in lightweight/fast mode                                      |
-| `uv run serve-model`           | Serve the best model using MLflow on **port 8080**                          |
-| `uv run health-check`          | Run a quick accuracy test on 50 random test samples                         |
-| `uv run serve-ui`              | Start the MLflow UI on **port 5000** for experiment tracking                |
+| Command                  | Description                                                                 |
+|--------------------------|-----------------------------------------------------------------------------|
+| `uv run train-model`     | Download data, preprocess, train models, and save artifacts                 |
+| `uv run serve-model`     | Serve the best model using MLflow on **port 8080**                          |
+| `uv run health-check`    | Run a quick accuracy test on 50 random test samples                         |
+| `uv run serve-ui`        | Start the MLflow UI on **port 5000** for experiment tracking                |
 
 #### Example Usage
 
 ```bash
-# Full training (recommended for best results)
+# Train the models (full mode by default)
 uv run train-model
-
-# Fast training for testing
-LIGHTWEIGHT=true uv run train-model
 
 # Serve the model for inference
 uv run serve-model
@@ -85,12 +71,15 @@ uv run serve-ui
 
 The repository includes a `Jenkinsfile` for automated deployment.
 
-When creating the Pipeline job in Jenkins:
-- You will see a **LIGHTWEIGHT** parameter in the job UI.
-- Set it to `true` for faster builds during development.
-- Set it to `false` for full training (better model quality).
+1. Create a new **Pipeline** job in Jenkins.
+2. Set **Definition** to *Pipeline script from SCM*.
+3. Choose **Git** and enter the repository URL.
+4. Save and run the pipeline.
 
-On successful completion, two Docker containers will start:
+> [!NOTE]
+> The first run may be aborted by Jenkins in order to correctly set pipeline parameters.
+
+On successful completion, two Docker containers will start in the background:
 - **`ml_model`** — serves model inference on **port 8080**
 - **`mlflow_ui`** — provides the MLflow dashboard on **port 5000**
 
@@ -124,6 +113,4 @@ dropout_prediction/
 
 ---
 
-**Made with ❤️ for MLOps learning purposes.**
-
-Feel free to open issues or submit pull requests!
+**Made with ❤️ by ubiquiste for MLOps learning purposes.**
